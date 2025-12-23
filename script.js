@@ -11,7 +11,7 @@ function fazerLogin() {
     const msgErro = document.getElementById('msg-login');
 
     if(!usuarioInput || !senhaInput) {
-        msgErro.innerText = "Preencha todos os campos!";
+        msgErro.innerText = "Preencha todos os campos !";
         return;
     }
 
