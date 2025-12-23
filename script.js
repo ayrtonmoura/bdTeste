@@ -24,19 +24,33 @@ function fazerLogin() {
         senha: senhaInput
     };
 
-    enviarParaAPI(dados, (resposta) => {
-        if(resposta.status === "sucesso") {
-            usuarioLogado = usuarioInput;
-            document.getElementById('display-usuario').innerText = usuarioLogado;
-            // Troca de tela
-            document.getElementById('tela-login').classList.add('escondido');
-            document.getElementById('tela-sistema').classList.remove('escondido');
-            // Já carrega a lista
-            carregarAgendamentos();
-        } else {
-            msgErro.innerText = resposta.msg;
+    function enviarParaAPI(dados, callbackSucesso) {
+    // 1. Envia os dados como string pura (text/plain)
+    // Isso evita que o navegador faça uma verificação de segurança (OPTIONS) que o Google rejeita
+    fetch(API_URL, {
+        method: "POST",
+        // Importante: Não defina headers de Content-Type application/json
+        // Deixe o navegador enviar como text/plain por padrão ou force assim:
+        headers: {
+            "Content-Type": "text/plain;charset=utf-8",
+        },
+        body: JSON.stringify(dados)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro na resposta da rede: ' + response.statusText);
         }
+        return response.json();
+    })
+    .then(json => {
+        callbackSucesso(json);
+    })
+    .catch(error => {
+        console.error("Erro detalhado:", error);
+        // Mostra o erro na tela para você saber o que houve
+        alert("Erro de comunicação: " + error.message);
     });
+}
 }
 
 // --- FUNÇÃO DE LOGOUT ---
