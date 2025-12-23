@@ -1,5 +1,5 @@
 // --- CONFIGURAÇÃO ---
-const API_URL = "https://script.google.com/macros/s/AKfycbzsLf6-7XGCsUba4Sdvf0tDE7-nfXXj6rUZGKNysRe2mK5e1W1y6_UG-ATrXksva9YQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz3SQDZFU1BW1rP7npLOduH7QnyUvqr4IwZprRpk_1WYhir-qP9q8HbMjOJmTb9w3kg/exec";
 
 // --- VARIÁVEIS DE CONTROLE ---
 let usuarioLogado = null; // Guardará o nome de quem entrou
@@ -24,31 +24,32 @@ function fazerLogin() {
         senha: senhaInput
     };
 
-    function enviarParaAPI(dados, callbackSucesso) {
-    // 1. Envia os dados como string pura (text/plain)
-    // Isso evita que o navegador faça uma verificação de segurança (OPTIONS) que o Google rejeita
+    // Substitua sua função enviarParaAPI por esta para debug
+function enviarParaAPI(dados, callbackSucesso) {
+    console.log("Enviando dados:", dados); // Mostra no console o que está indo
+
     fetch(API_URL, {
         method: "POST",
-        // Importante: Não defina headers de Content-Type application/json
-        // Deixe o navegador enviar como text/plain por padrão ou force assim:
-        headers: {
-            "Content-Type": "text/plain;charset=utf-8",
-        },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(dados)
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Erro na resposta da rede: ' + response.statusText);
+    .then(response => response.text()) // Primeiro pegamos como texto para ver se é erro HTML
+    .then(texto => {
+        try {
+            const json = JSON.parse(texto); // Tenta converter pra JSON
+            if(json.status === "erro_fatal") {
+                alert("Erro no Google: " + json.msg); // Mostra erro do script na tela
+            } else {
+                callbackSucesso(json);
+            }
+        } catch (e) {
+            console.error("Recebido do servidor:", texto);
+            alert("Erro fatal: O servidor não retornou JSON. Olhe o console (F12).");
         }
-        return response.json();
-    })
-    .then(json => {
-        callbackSucesso(json);
     })
     .catch(error => {
-        console.error("Erro detalhado:", error);
-        // Mostra o erro na tela para você saber o que houve
-        alert("Erro de comunicação: " + error.message);
+        console.error("Erro de rede:", error);
+        alert("Erro de conexão. Verifique sua internet ou a URL.");
     });
 }
 }
