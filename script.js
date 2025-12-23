@@ -1,221 +1,92 @@
 // --- CONFIGURAÇÃO ---
-const API_URL = "https://script.google.com/macros/s/AKfycbz3SQDZFU1BW1rP7npLOduH7QnyUvqr4IwZprRpk_1WYhir-qP9q8HbMjOJmTb9w3kg/exec";
+// GARANTA QUE ESTA URL É A DA SUA ULTIMA IMPLANTAÇÃO (A que funcionou no teste do console)
+const API_URL = "https://script.google.com/macros/s/AKfycbw6Gz6jHJDNn76jyGEq486ZdQ1noXgJ86nC1nlcJ-lZnDp5_RC-8wKTcHQTf8hqXCSu/exec";
 
-// --- VARIÁVEIS DE CONTROLE ---
-let usuarioLogado = null; // Guardará o nome de quem entrou
+let usuarioLogado = null;
 
 // --- FUNÇÃO DE LOGIN ---
 function fazerLogin() {
-    const usuarioInput = document.getElementById('login-usuario').value;
-    const senhaInput = document.getElementById('login-senha').value;
+    console.log("1. Função fazerLogin iniciada"); // Debug
+
+    const usuarioInput = document.getElementById('login-usuario');
+    const senhaInput = document.getElementById('login-senha');
     const msgErro = document.getElementById('msg-login');
 
-    if(!usuarioInput || !senhaInput) {
-        msgErro.innerText = "Preencha todos os campos !";
+    // Verificação de segurança caso os IDs do HTML estejam errados
+    if (!usuarioInput || !senhaInput) {
+        console.error("ERRO CRÍTICO: Não achei os inputs no HTML. Verifique os IDs 'login-usuario' e 'login-senha'");
+        alert("Erro no código HTML. Abra o console.");
+        return;
+    }
+
+    const usuario = usuarioInput.value;
+    const senha = senhaInput.value;
+
+    console.log("2. Dados pegos do formulário:", usuario, senha);
+
+    if(!usuario || !senha) {
+        msgErro.innerText = "Preencha todos os campos!";
         return;
     }
 
     msgErro.innerText = "Verificando...";
+    console.log("3. Enviando para a API...");
 
-    // Prepara o pacote para enviar
     const dados = {
         action: "login",
-        usuario: usuarioInput,
-        senha: senhaInput
+        usuario: usuario,
+        senha: senha
     };
 
-    // Substitua sua função enviarParaAPI por esta para debug
-function enviarParaAPI(dados, callbackSucesso) {
-    console.log("Enviando dados:", dados); // Mostra no console o que está indo
+    enviarParaAPI(dados, (resposta) => {
+        console.log("5. Resposta recebida dentro do fazerLogin:", resposta);
+        
+        if(resposta.status === "sucesso") {
+            usuarioLogado = usuario;
+            document.getElementById('display-usuario').innerText = usuarioLogado;
+            document.getElementById('tela-login').classList.add('escondido');
+            document.getElementById('tela-sistema').classList.remove('escondido');
+            carregarAgendamentos();
+        } else {
+            // AQUI É ONDE ELE ESTAVA TRAVANDO ANTES
+            msgErro.innerText = resposta.msg || "Erro desconhecido"; 
+            console.log("Login recusado pelo servidor:", resposta.msg);
+        }
+    });
+}
 
+// --- FUNÇÃO DE ENVIAR (A Mágica) ---
+function enviarParaAPI(dados, callbackSucesso) {
     fetch(API_URL, {
         method: "POST",
+        // Importante: text/plain para evitar CORS Preflight
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(dados)
     })
-    .then(response => response.text()) // Primeiro pegamos como texto para ver se é erro HTML
+    .then(response => {
+        console.log("4a. Resposta bruta da rede recebida");
+        return response.text(); // Pega como texto primeiro para garantir
+    })
     .then(texto => {
+        console.log("4b. Texto recebido do servidor:", texto);
         try {
-            const json = JSON.parse(texto); // Tenta converter pra JSON
-            if(json.status === "erro_fatal") {
-                alert("Erro no Google: " + json.msg); // Mostra erro do script na tela
-            } else {
-                callbackSucesso(json);
-            }
+            const json = JSON.parse(texto); // Tenta transformar em JSON
+            callbackSucesso(json); // Chama a função de volta
         } catch (e) {
-            console.error("Recebido do servidor:", texto);
-            alert("Erro fatal: O servidor não retornou JSON. Olhe o console (F12).");
+            console.error("ERRO AO LER JSON:", e);
+            document.getElementById('msg-login').innerText = "Erro: Servidor não retornou JSON válido.";
+            alert("O servidor respondeu, mas não foi JSON. Olhe o console.");
         }
     })
     .catch(error => {
-        console.error("Erro de rede:", error);
-        alert("Erro de conexão. Verifique sua internet ou a URL.");
-    });
-}
-}
-
-// --- FUNÇÃO DE LOGOUT ---
-function sair() {
-    location.reload(); // Recarrega a página para limpar tudo
-}
-
-// --- FUNÇÃO DE SALVAR (CRIAR OU EDITAR) ---
-function salvarAgendamento() {
-    const data = document.getElementById('data').value;
-    const hora = document.getElementById('hora').value;
-    const unidade = document.getElementById('unidade').value;
-    const idEdicao = document.getElementById('id-edicao').value;
-
-    if(!data || !hora || !unidade) {
-        alert("Preencha todos os campos");
-        return;
-    }
-
-    const botao = document.getElementById('btn-salvar');
-    botao.innerText = "Salvando...";
-    botao.disabled = true;
-
-    // Define se é criação nova ou edição baseada se tem ID escondido
-    let dados;
-    if (idEdicao) {
-        // MODO EDIÇÃO
-        dados = {
-            action: "editar",
-            idParaEditar: idEdicao,
-            novaData: data,
-            novaHora: hora,
-            novaUnidade: unidade
-        };
-    } else {
-        // MODO CRIAÇÃO (NOVO)
-        dados = {
-            action: "agendar",
-            usuario: usuarioLogado,
-            data: data,
-            hora: hora,
-            unidade: unidade
-        };
-    }
-
-    enviarParaAPI(dados, (resposta) => {
-        alert("Salvo com sucesso!");
-        // Limpa o formulário
-        document.getElementById('data').value = "";
-        document.getElementById('hora').value = "";
-        document.getElementById('unidade').value = "";
-        document.getElementById('id-edicao').value = "";
-        
-        // Reseta botões
-        botao.innerText = "Agendar";
-        botao.disabled = false;
-        document.getElementById('btn-cancelar').classList.add('escondido');
-        
-        // Atualiza a tabela
-        carregarAgendamentos();
+        console.error("ERRO DE REDE:", error);
+        document.getElementById('msg-login').innerText = "Erro de conexão.";
+        alert("Falha na conexão com o Google.");
     });
 }
 
-// --- FUNÇÃO DE LISTAR ---
-function carregarAgendamentos() {
-    const loading = document.getElementById('loading');
-    const tbody = document.getElementById('lista-corpo');
-    
-    loading.classList.remove('escondido');
-    tbody.innerHTML = ""; // Limpa a tabela atual
+// --- OUTRAS FUNÇÕES (Pode manter as suas ou colar estas versões simples) ---
+function sair() { location.reload(); }
 
-    const dados = {
-        action: "listar",
-        usuario: usuarioLogado
-    };
-
-    enviarParaAPI(dados, (resposta) => {
-        loading.classList.add('escondido');
-        
-        // Loop para criar as linhas da tabela
-        resposta.dados.forEach(item => {
-            // Formata a data simples (ano-mes-dia)
-            let dataFormatada = new Date(item.data).toLocaleDateString('pt-BR');
-            // Corrige fuso horário simples cortando a string se vier completa
-            // (Para simplicidade, usaremos o valor cru se for string YYYY-MM-DD)
-            if(item.data.length >= 10) dataFormatada = item.data.substring(0,10).split('-').reverse().join('/');
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${dataFormatada}</td>
-                <td>${item.hora}</td>
-                <td>${item.unidade}</td>
-                <td>
-                    <button class="btn-editar" onclick="prepararEdicao('${item.id}', '${item.data}', '${item.hora}', '${item.unidade}')">Editar</button>
-                    <button class="btn-excluir" onclick="apagarAgendamento('${item.id}')">Excluir</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    });
-}
-
-// --- FUNÇÃO DE APAGAR ---
-function apagarAgendamento(id) {
-    if(!confirm("Tem certeza que deseja apagar?")) return;
-
-    const dados = {
-        action: "apagar",
-        idParaApagar: id
-    };
-
-    enviarParaAPI(dados, (resposta) => {
-        if(resposta.status === "sucesso") {
-            carregarAgendamentos();
-        } else {
-            alert("Erro ao apagar.");
-        }
-    });
-}
-
-// --- FUNÇÃO AUXILIAR: PREPARAR TELA PARA EDIÇÃO ---
-function prepararEdicao(id, data, hora, unidade) {
-    // Pega a data crua da API (que geralmente vem como string ISO 2024-12-25...)
-    // O input type="date" precisa de YYYY-MM-DD.
-    let dataInput = data;
-    if(data.includes('T')) dataInput = data.split('T')[0]; 
-
-    document.getElementById('id-edicao').value = id;
-    document.getElementById('data').value = dataInput;
-    
-    // Formata hora se necessário
-    let horaInput = hora;
-    if(hora.length > 5) horaInput = hora.substring(0,5);
-    document.getElementById('hora').value = horaInput;
-    
-    document.getElementById('unidade').value = unidade;
-
-    // Muda o texto do botão e mostra cancelar
-    document.getElementById('btn-salvar').innerText = "Atualizar Agendamento";
-    document.getElementById('btn-cancelar').classList.remove('escondido');
-}
-
-function cancelarEdicao() {
-    document.getElementById('id-edicao').value = "";
-    document.getElementById('data').value = "";
-    document.getElementById('hora').value = "";
-    document.getElementById('unidade').value = "";
-    document.getElementById('btn-salvar').innerText = "Agendar";
-    document.getElementById('btn-cancelar').classList.add('escondido');
-}
-
-// --- FUNÇÃO CENTRAL DE COMUNICAÇÃO COM API (O FETCH) ---
-function enviarParaAPI(dados, callbackSucesso) {
-    // O Apps Script exige "text/plain" para evitar erros complexos de CORS em navegadores
-    fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(dados)
-    })
-    .then(response => response.json())
-    .then(json => {
-        callbackSucesso(json);
-    })
-    .catch(error => {
-        console.error("Erro:", error);
-        alert("Houve um erro na comunicação com a planilha.");
-    });
-}
+// ... (Mantenha o resto das suas funções agendar/listar aqui) ...
+// Para testar o login, não precisamos delas agora.
