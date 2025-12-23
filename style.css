@@ -1,0 +1,71 @@
+/* Configuração básica da página */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* O container principal (caixa branca) */
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Esconder elementos (usado pelo JS) */
+.escondido {
+    display: none;
+}
+
+/* Estilos de inputs e botões */
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    box-sizing: border-box; /* Garante que padding não estoure a largura */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* Botões específicos */
+.btn-sair { background-color: #dc3545; width: auto; float: right; }
+.btn-atualizar { background-color: #007bff; margin-bottom: 15px;}
+.btn-editar { background-color: #ffc107; color: black; width: auto; padding: 5px 10px; margin-right: 5px;}
+.btn-excluir { background-color: #dc3545; width: auto; padding: 5px 10px;}
+
+/* Tabelas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.erro { color: red; font-size: 14px; text-align: center;}
