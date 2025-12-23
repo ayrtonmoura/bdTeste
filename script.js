@@ -1,5 +1,5 @@
 // --- CONFIGURAÇÃO ---
-const API_URL = "https://script.google.com/macros/s/AKfycbx5_9V3W1UsP7IzM1B7X1mDln8ihateexwJKgZmaxiMliTAChPhgT2iP43Tot_uagQM/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzsLf6-7XGCsUba4Sdvf0tDE7-nfXXj6rUZGKNysRe2mK5e1W1y6_UG-ATrXksva9YQ/exec";
 
 // --- VARIÁVEIS DE CONTROLE ---
 let usuarioLogado = null; // Guardará o nome de quem entrou
