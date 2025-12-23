@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Agendamento Escolar</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="tela-login" class="container">
+        <h2>Acesso ao Sistema</h2>
+        <input type="text" id="login-usuario" placeholder="Nome de Usuário">
+        <input type="password" id="login-senha" placeholder="Senha">
+        <button onclick="fazerLogin()">Entrar</button>
+        <p id="msg-login" class="erro"></p>
+    </div>
+
+    <div id="tela-sistema" class="container escondido">
+        <header>
+            <h3>Bem-vindo, <span id="display-usuario"></span></h3>
+            <button onclick="sair()" class="btn-sair">Sair</button>
+        </header>
+
+        <div class="card">
+            <h3>Novo Agendamento</h3>
+            <input type="hidden" id="id-edicao"> 
+            
+            <label>Data:</label>
+            <input type="date" id="data">
+            
+            <label>Horário:</label>
+            <input type="time" id="hora">
+            
+            <label>Unidade Escolar:</label>
+            <input type="text" id="unidade" placeholder="Ex: Escola Municipal Centro">
+            
+            <button onclick="salvarAgendamento()" id="btn-salvar">Agendar</button>
+            <button onclick="cancelarEdicao()" id="btn-cancelar" class="escondido">Cancelar Edição</button>
+        </div>
+
+        <div class="card">
+            <h3>Meus Agendamentos</h3>
+            <button onclick="carregarAgendamentos()" class="btn-atualizar">Atualizar Lista</button>
+            <div id="loading" class="escondido">Carregando...</div>
+            
+            <table id="tabela-agendamentos">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Unidade</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-corpo">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
