@@ -1,5 +1,5 @@
 // --- CONFIGURAÇÃO ---
-const API_URL = "COLE_SUA_URL_DO_APPSCRIPT_AQUI";
+const API_URL = "https://script.google.com/macros/s/AKfycby77Lg9FSIO3SJz5OA5Z84nMw1ZlIFOOn4rT_Ze0WX24ABRgdhS0-mgXcEm6Kc4HMqR/exec";
 
 // --- VARIÁVEIS DE CONTROLE ---
 let usuarioLogado = null; // Guardará o nome de quem entrou
